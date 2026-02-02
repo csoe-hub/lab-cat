@@ -3,14 +3,11 @@ This program prints stdin to the screen.
 '''
 import sys
 
-def cat(file):
-    data = file.read()
-    sys.stdout.buffer.write(data)
+def cat(filename):
+    with open(filename, 'r') as f:
+        for line in f:
+            sys.stdout.write(line)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        for filename in sys.argv[1:]:
-            with open(filename, "rb") as f:
-                cat(f)
-    else:
-        cat(sys.stdin.buffer)
+    for filename in sys.argv[1:]:
+         cat(filename)
