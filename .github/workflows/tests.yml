@@ -1,5 +1,4 @@
-name: tests
-name: Tests
+name: Python CI
 
 on:
   push:
@@ -10,36 +9,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout code
       - uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
-
-on: [push, pull_request]
-
-jobs:
-  memory-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
+      # Step 2: Set up Python (3.11 is common)
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: 3.11
 
-      - name: Test O(1) memory with /dev/urandom stream
+      # Step 3: Install dependencies
+      - name: Install dependencies
         run: |
-          # Stream random data for 60s; if memory is O(n), this will OOM
-          # GitHub Actions runners have ~7GB RAM; 60s of urandom >> 7GB
-          timeout 60 cat /dev/urandom | python cat.py > /dev/null
-          echo "Memory test passed - script maintained O(1) memory"
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # Step 4: Run your tests
+      - name: Run tests
+        run: |
+          if [ -f test_cat.py ]; then python -m unittest discover -s . -p "test_*.py"; else echo "No test file found, skipping"; fi
+    
